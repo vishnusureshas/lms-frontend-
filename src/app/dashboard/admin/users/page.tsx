@@ -145,7 +145,8 @@ export default function AdminUsersPage() {
         userIds: ids,
         action: action as any,
       }).unwrap();
-      toast.success(result.data?.message || `${label} applied to ${result.data?.processed} user(s)`);
+      const bulkResult = result.data;
+      toast.success(result.message || `${label} applied to ${bulkResult?.processed} user(s)`);
       setSelectedIds(new Set());
     } catch (err: any) {
       toast.error(err?.data?.message || `Failed to perform ${label}`);
