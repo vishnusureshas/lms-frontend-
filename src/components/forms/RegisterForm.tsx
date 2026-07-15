@@ -13,6 +13,7 @@ import AuthInput from '@/components/auth/AuthInput';
 import AuthButton from '@/components/auth/AuthButton';
 import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
 import { Mail, Lock, User, AlertTriangle, ArrowRight, GraduationCap, Code2 } from 'lucide-react';
+import { FullPageLoader } from '@/components/ui/Loader';
 
 const formVariants = {
   hidden: { opacity: 0 },
@@ -41,6 +42,7 @@ export default function RegisterForm() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -79,12 +81,18 @@ export default function RegisterForm() {
         })
       );
 
+      setIsRedirecting(true);
+      await new Promise((resolve) => setTimeout(resolve, 600));
       router.push(getDashboardUrl(result.data.user.role));
     } catch (err: any) {
       const message = err?.data?.message || 'Registration failed. Please try again.';
       setServerError(message);
     }
   };
+
+  if (isRedirecting) {
+    return <FullPageLoader mode="register" />;
+  }
 
   return (
     <motion.form

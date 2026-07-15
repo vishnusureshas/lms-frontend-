@@ -1,34 +1,49 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, GraduationCap, BookOpen, Zap, Brain } from 'lucide-react';
+import { Sparkles, GraduationCap, BookOpen, Zap, Brain, Rocket, Star, Globe, Code2, Palette } from 'lucide-react';
 
-// ───── Messages that cycle during loading ─────
-const LOADING_MESSAGES = [
-  { text: 'Preparing your dashboard...', icon: Sparkles },
-  { text: 'Loading your courses...', icon: BookOpen },
-  { text: 'Syncing your progress...', icon: Brain },
-  { text: 'Almost ready...', icon: Zap },
+const LOADING_MESSAGES: Record<string, { text: string; icon: typeof Sparkles }[]> = {
+  login: [
+    { text: 'Verifying your identity...', icon: Sparkles },
+    { text: 'Loading your courses...', icon: BookOpen },
+    { text: 'Syncing your progress...', icon: Brain },
+    { text: 'Almost ready...', icon: Zap },
+  ],
+  register: [
+    { text: 'Creating your account...', icon: Rocket },
+    { text: 'Setting up your profile...', icon: Star },
+    { text: 'Preparing your dashboard...', icon: Globe },
+    { text: 'Welcome aboard!', icon: Sparkles },
+  ],
+};
+
+const COLORS = [
+  { from: '#6366f1', to: '#a855f7' },
+  { from: '#06b6d4', to: '#6366f1' },
+  { from: '#a855f7', to: '#ec4899' },
+  { from: '#10b981', to: '#06b6d4' },
 ];
 
 interface FullPageLoaderProps {
-  mode: 'login' | 'logout';
+  mode: 'login' | 'register';
 }
 
 export function FullPageLoader({ mode }: FullPageLoaderProps) {
+  const messages = LOADING_MESSAGES[mode];
   const [messageIndex, setMessageIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [colorIndex, setColorIndex] = useState(0);
 
-  // Cycle through messages
   useEffect(() => {
     const msgInterval = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
-    }, 2000);
+      setMessageIndex((prev) => (prev + 1) % messages.length);
+      setColorIndex((prev) => (prev + 1) % COLORS.length);
+    }, 1800);
     return () => clearInterval(msgInterval);
-  }, []);
+  }, [messages.length]);
 
-  // Animate progress bar smoothly
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -36,58 +51,107 @@ export function FullPageLoader({ mode }: FullPageLoaderProps) {
           clearInterval(interval);
           return 95;
         }
-        // Slow down as it progresses
-        const increment = Math.max(1, 15 * (1 - prev / 100));
+        const increment = Math.max(1, 18 * (1 - prev / 100));
         return Math.min(95, prev + increment);
       });
-    }, 300);
+    }, 250);
     return () => clearInterval(interval);
   }, []);
 
-  const CurrentIcon = LOADING_MESSAGES[messageIndex].icon;
+  const CurrentIcon = messages[messageIndex].icon;
+  const color = COLORS[colorIndex];
+
+  const particles = useMemo(() =>
+    Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 4 + 1,
+      duration: Math.random() * 3 + 2,
+      delay: Math.random() * 2,
+    })),
+  []);
 
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden">
-      {/* ───── Animated gradient background ───── */}
       <div className="absolute inset-0 bg-[#020617]">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-cyan-500/5 animate-pulse-glow" />
+        <motion.div
+          className="absolute inset-0"
+          animate={{ opacity: [0.3, 0.6, 0.3] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            background: `radial-gradient(ellipse at 50% 0%, ${color.from}22 0%, transparent 60%)`,
+          }}
+        />
+        <motion.div
+          className="absolute inset-0"
+          animate={{ opacity: [0.2, 0.5, 0.2] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+          style={{
+            background: `radial-gradient(ellipse at 80% 80%, ${color.to}18 0%, transparent 50%)`,
+          }}
+        />
       </div>
 
-      {/* ───── Floating gradient orbs ───── */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/15 to-purple-500/10 rounded-full blur-3xl animate-blob-slow" />
-      <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-gradient-to-br from-cyan-500/12 to-blue-500/8 rounded-full blur-3xl animate-blob" />
-      <div className="absolute bottom-1/4 right-1/3 w-72 h-72 bg-gradient-to-br from-purple-500/12 to-pink-500/8 rounded-full blur-3xl animate-blob-fast" />
-      <div className="absolute bottom-1/3 left-1/3 w-64 h-64 bg-gradient-to-br from-emerald-500/8 to-cyan-500/6 rounded-full blur-3xl animate-blob-slow" style={{ animationDelay: '2s' }} />
-
-      {/* ───── Grid overlay ───── */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.02]"
         style={{
           backgroundImage:
             'linear-gradient(rgba(99, 102, 241, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.5) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
+          backgroundSize: '40px 40px',
         }}
       />
 
-      {/* ───── Content ───── */}
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="absolute rounded-full bg-white"
+          style={{
+            width: p.size,
+            height: p.size,
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+          }}
+          animate={{
+            y: [0, -30, 0],
+            opacity: [0, 0.8, 0],
+          }}
+          transition={{
+            duration: p.duration,
+            repeat: Infinity,
+            delay: p.delay,
+            ease: 'easeInOut',
+          }}
+        />
+      ))}
+
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/15 to-purple-500/10 rounded-full blur-3xl animate-blob-slow" />
+      <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-gradient-to-br from-cyan-500/12 to-blue-500/8 rounded-full blur-3xl animate-blob" />
+      <div className="absolute bottom-1/4 right-1/3 w-72 h-72 bg-gradient-to-br from-purple-500/12 to-pink-500/8 rounded-full blur-3xl animate-blob-fast" />
+
       <div className="relative z-10 flex flex-col items-center gap-8">
-        {/* ── Animated Logo ── */}
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', stiffness: 200, damping: 15, duration: 0.8 }}
           className="relative"
         >
-          {/* Glow behind logo */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary-500/30 to-purple-500/30 rounded-3xl blur-2xl animate-pulse-glow" />
+          <motion.div
+            className="absolute inset-0 rounded-3xl blur-2xl"
+            animate={{
+              background: [
+                `radial-gradient(circle, ${color.from}40, ${color.to}20)`,
+                `radial-gradient(circle, ${color.to}40, ${color.from}20)`,
+                `radial-gradient(circle, ${color.from}40, ${color.to}20)`,
+              ],
+            }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          />
 
-          {/* Logo container */}
           <div className="relative h-24 w-24 rounded-3xl bg-gradient-to-br from-slate-900 to-slate-950 border border-white/[0.08] flex items-center justify-center shadow-2xl overflow-hidden">
-            {/* Inner shimmer */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 via-purple-500/10 to-cyan-500/10" />
             <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/[0.02] to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
 
-            {/* Icon */}
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
@@ -97,7 +161,6 @@ export function FullPageLoader({ mode }: FullPageLoaderProps) {
           </div>
         </motion.div>
 
-        {/* ── Brand Name ── */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -105,12 +168,15 @@ export function FullPageLoader({ mode }: FullPageLoaderProps) {
           className="flex flex-col items-center gap-1"
         >
           <h2 className="text-2xl font-bold gradient-text tracking-tight">EduLMS</h2>
-          <p className="text-xs text-slate-500 font-medium tracking-widest uppercase">
-            {mode === 'login' ? 'Signing you in' : 'Signing you out'}
-          </p>
+          <motion.p
+            className="text-xs font-medium tracking-widest uppercase"
+            animate={{ color: [color.from, color.to, color.from] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            {mode === 'login' ? 'Signing you in' : 'Creating your account'}
+          </motion.p>
         </motion.div>
 
-        {/* ── Animated Messages ── */}
         <div className="h-12 flex items-center justify-center">
           <AnimatePresence mode="wait">
             <motion.div
@@ -125,52 +191,56 @@ export function FullPageLoader({ mode }: FullPageLoaderProps) {
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <CurrentIcon className="h-5 w-5 text-primary-400" />
+                <CurrentIcon className="h-5 w-5" style={{ color: color.from }} />
               </motion.div>
               <span className="text-base text-slate-300 font-medium">
-                {LOADING_MESSAGES[messageIndex].text}
+                {messages[messageIndex].text}
               </span>
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* ── Progress Bar ── */}
         <div className="w-64 sm:w-80">
           <div className="relative h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-            {/* Background shimmer */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
-            {/* Progress fill */}
             <motion.div
-              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary-500 via-purple-500 to-cyan-500"
-              style={{ width: `${progress}%` }}
-              layout
+              className="absolute inset-y-0 left-0 rounded-full"
+              style={{
+                background: `linear-gradient(90deg, ${color.from}, ${color.to})`,
+                width: `${progress}%`,
+              }}
             />
-            {/* Glow on progress */}
             <div
-              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary-400/50 via-purple-400/50 to-transparent blur-sm"
-              style={{ width: `${progress + 10}%` }}
+              className="absolute inset-y-0 left-0 rounded-full blur-sm"
+              style={{
+                background: `linear-gradient(90deg, ${color.from}80, ${color.to}40, transparent)`,
+                width: `${progress + 15}%`,
+              }}
             />
           </div>
           <div className="flex justify-between mt-2">
             <span className="text-[10px] text-slate-600 font-medium uppercase tracking-wider">
-              {mode === 'login' ? 'Redirecting' : 'Please wait'}
+              {mode === 'login' ? 'Redirecting' : 'Setting up'}
             </span>
             <span className="text-[10px] text-slate-600 font-mono">{Math.round(progress)}%</span>
           </div>
         </div>
 
-        {/* ── Loading Dots ── */}
-        <div className="flex gap-1.5">
+        <div className="flex gap-2">
           {[0, 1, 2].map((i) => (
             <motion.div
               key={i}
-              className="h-2 w-2 rounded-full bg-primary-400/60"
+              className="h-2 w-2 rounded-full"
+              style={{
+                background: `linear-gradient(135deg, ${color.from}, ${color.to})`,
+              }}
               animate={{
-                y: [0, -6, 0],
-                opacity: [0.4, 1, 0.4],
+                y: [0, -8, 0],
+                opacity: [0.3, 1, 0.3],
+                scale: [1, 1.3, 1],
               }}
               transition={{
-                duration: 1.2,
+                duration: 1,
                 repeat: Infinity,
                 delay: i * 0.2,
                 ease: 'easeInOut',
@@ -180,20 +250,21 @@ export function FullPageLoader({ mode }: FullPageLoaderProps) {
         </div>
       </div>
 
-      {/* ───── Bottom decorative line ───── */}
       <motion.div
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{ delay: 0.5, duration: 0.8 }}
-        className="absolute bottom-12 left-1/2 -translate-x-1/2 h-[1px] w-40 bg-gradient-to-r from-transparent via-primary-500/30 to-transparent"
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 h-[1px] w-40"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${color.from}60, ${color.to}60, transparent)`,
+        }}
       />
     </div>
   );
 }
 
 /**
- * Logout overlay - renders inside the dashboard layout
- * to show the loader when the user signs out
+ * Logout overlay
  */
 export function LogoutLoader() {
   return (
@@ -204,7 +275,7 @@ export function LogoutLoader() {
       transition={{ duration: 0.3 }}
       className="fixed inset-0 z-[9999]"
     >
-      <FullPageLoader mode="logout" />
+      <FullPageLoader mode="login" />
     </motion.div>
   );
 }
