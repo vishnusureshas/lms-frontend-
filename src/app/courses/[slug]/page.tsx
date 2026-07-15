@@ -19,7 +19,7 @@ export default function CourseDetailPage() {
 
   const { data, isLoading, error } = useGetCourseBySlugQuery(slug);
   const courseId = data?.data?.id;
-  const { data: reviewsData } = useGetCourseReviewsQuery(courseId!, { skip: !courseId, limit: 10 });
+  const { data: reviewsData } = useGetCourseReviewsQuery({ courseId: courseId!, page: 1, limit: 10 }, { skip: !courseId });
 
   const handleEnroll = async () => {
     if (!course?.id) return;
