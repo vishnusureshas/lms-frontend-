@@ -52,8 +52,9 @@ import { updateTokens, logout } from '@/store/slices/authSlice';
 const mutex = new Mutex();
 
 // ───── Base Query ─────
+const IS_CLIENT = typeof window !== 'undefined';
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1',
+  baseUrl: IS_CLIENT ? '/api/v1' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'),
   credentials: 'include',
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.accessToken;
