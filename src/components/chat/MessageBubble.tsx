@@ -88,7 +88,7 @@ export default function MessageBubble({ message, isOwn, showSender = true, onRep
         </div>
 
         {/* Hover actions */}
-        {!message.is_deleted && message.message_type !== 'system' && (
+        {!message.is_deleted && (message.message_type as string) !== 'system' && (
           <div className={cn(
             'absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-slate-800/90 rounded-lg border border-white/[0.06] shadow-xl px-1 py-0.5',
             isOwn ? '-left-20' : '-right-20'

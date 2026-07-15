@@ -42,7 +42,7 @@ export default function SettingsPage() {
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await updateUser({ id: user.id, data: { full_name: form.fullName, bio: form.bio, headline: form.headline } }).unwrap();
+      await updateUser({ id: user.id, data: { fullName: form.fullName, bio: form.bio, headline: form.headline } }).unwrap();
       toast.success('Profile updated successfully');
     } catch {
       toast.error('Failed to update profile');
